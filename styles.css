@@ -21,6 +21,7 @@ body {
 #calendar {
     display: flex;
     flex-wrap: wrap;
+    margin-top: 20px;
 }
 
 .day {
@@ -38,6 +39,7 @@ body {
 
 .full {
     background-color: #f8d7da;
+    cursor: not-allowed;
 }
 
 .selected {
