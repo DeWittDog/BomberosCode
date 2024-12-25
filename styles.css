@@ -29,8 +29,21 @@ body {
     padding: 10px;
     box-sizing: border-box;
     text-align: center;
+    cursor: pointer;
+}
+
+.day:hover {
+    background-color: #f0f0f0;
 }
 
 .full {
     background-color: #f8d7da;
+}
+
+.selected {
+    background-color: #d1e7dd;
+}
+
+#message {
+    margin-top: 10px;
 }
