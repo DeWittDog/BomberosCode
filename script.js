@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
-    // Load signups from localStorage or initialize an empty object if not present
+    // Cargar inscripciones desde localStorage o inicializar un objeto vacío si no hay datos
     const signups = JSON.parse(localStorage.getItem('signups')) || {};
 
     function renderCalendar(month, year) {
@@ -29,20 +29,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 dayDiv.classList.add('full');
             }
 
-            dayDiv.addEventListener('click', () => selectDay(dayDiv));
+            dayDiv.addEventListener('click', (event) => selectDay(event, dayDiv));
 
             calendarDiv.appendChild(dayDiv);
         }
     }
 
-    function selectDay(dayDiv) {
-        console.log(`Day selected: ${dayDiv.dataset.day}`);
+    function selectDay(event, dayDiv) {
+        // Prevenir selección de días llenos
+        if (dayDiv.classList.contains('full')) {
+            messageDiv.textContent = 'Este día ya está completo.';
+            return;
+        }
+
         const previousSelected = document.querySelector('.day.selected');
         if (previousSelected) {
             previousSelected.classList.remove('selected');
         }
         dayDiv.classList.add('selected');
         selectedDayInput.value = dayDiv.dataset.day;
+        messageDiv.textContent = ''; // Limpiar mensaje de error
     }
 
     function handleSubmit(event) {
@@ -73,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         signups[selectedDay].push(name);
-        localStorage.setItem('signups', JSON.stringify(signups)); // Save signups to localStorage
+        localStorage.setItem('signups', JSON.stringify(signups)); // Guardar inscripciones en localStorage
         nameInput.value = '';
         selectedDayInput.value = '';
         renderCalendar(currentMonth, currentYear);
