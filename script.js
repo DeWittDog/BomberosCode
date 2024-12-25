@@ -3,13 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxDaysPerPerson = 4;
     const form = document.getElementById('signupForm');
     const nameInput = document.getElementById('name');
-    const selectedDayInput = document.getElementById('selectedDay');
     const calendarDiv = document.getElementById('calendar');
     const messageDiv = document.getElementById('message');
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
+    let selectedDays = []; // Array to keep track of selected days
 
-    // Cargar inscripciones desde localStorage o inicializar un objeto vacío si no hay datos
+    // Load signups from localStorage or initialize an empty object if not present
     const signups = JSON.parse(localStorage.getItem('signups')) || {};
 
     function renderCalendar(month, year) {
@@ -29,6 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 dayDiv.classList.add('full');
             }
 
+            if (selectedDays.includes(day.toString())) {
+                dayDiv.classList.add('selected');
+            }
+
             dayDiv.addEventListener('click', (event) => selectDay(event, dayDiv));
 
             calendarDiv.appendChild(dayDiv);
@@ -36,52 +40,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function selectDay(event, dayDiv) {
-        // Prevenir selección de días llenos
+        // Prevent selection of full days
         if (dayDiv.classList.contains('full')) {
             messageDiv.textContent = 'Este día ya está completo.';
             return;
         }
 
-        const previousSelected = document.querySelector('.day.selected');
-        if (previousSelected) {
-            previousSelected.classList.remove('selected');
+        const day = dayDiv.dataset.day;
+
+        if (selectedDays.includes(day)) {
+            // Deselect the day
+            selectedDays = selectedDays.filter(d => d !== day);
+            dayDiv.classList.remove('selected');
+        } else {
+            // Check if the user has already selected 4 days
+            if (selectedDays.length >= maxDaysPerPerson) {
+                messageDiv.textContent = `Solo puedes seleccionar hasta ${maxDaysPerPerson} días.`;
+                return;
+            }
+            // Select the day
+            selectedDays.push(day);
+            dayDiv.classList.add('selected');
         }
-        dayDiv.classList.add('selected');
-        selectedDayInput.value = dayDiv.dataset.day;
-        messageDiv.textContent = ''; // Limpiar mensaje de error
+        messageDiv.textContent = ''; // Clear error message
     }
 
     function handleSubmit(event) {
         event.preventDefault();
         const name = nameInput.value.trim();
-        const selectedDay = selectedDayInput.value;
-        if (!name || !selectedDay) {
-            messageDiv.textContent = 'Por favor, ingresa tu nombre y selecciona un día.';
+        if (!name || selectedDays.length === 0) {
+            messageDiv.textContent = 'Por favor, ingresa tu nombre y selecciona al menos un día.';
             return;
         }
 
         const daysSignedUp = Object.values(signups).flat().filter(n => n === name).length;
-        if (daysSignedUp >= maxDaysPerPerson) {
-            messageDiv.textContent = `Solo puedes anotarte en ${maxDaysPerPerson} días por mes.`;
+        if (daysSignedUp + selectedDays.length > maxDaysPerPerson) {
+            messageDiv.textContent = `Solo puedes anotarte en un total de ${maxDaysPerPerson} días por mes.`;
             return;
         }
 
-        signups[selectedDay] = signups[selectedDay] || [];
+        selectedDays.forEach(day => {
+            signups[day] = signups[day] || [];
+            if (!signups[day].includes(name) && signups[day].length < maxSlotsPerDay) {
+                signups[day].push(name);
+            }
+        });
 
-        if (signups[selectedDay].includes(name)) {
-            messageDiv.textContent = 'No puedes anotarte más de una vez en el mismo día.';
-            return;
-        }
-
-        if (signups[selectedDay].length >= maxSlotsPerDay) {
-            messageDiv.textContent = 'Este día ya está completo.';
-            return;
-        }
-
-        signups[selectedDay].push(name);
-        localStorage.setItem('signups', JSON.stringify(signups)); // Guardar inscripciones en localStorage
+        localStorage.setItem('signups', JSON.stringify(signups)); // Save signups to localStorage
         nameInput.value = '';
-        selectedDayInput.value = '';
+        selectedDays = [];
         renderCalendar(currentMonth, currentYear);
         messageDiv.textContent = 'Te has anotado con éxito.';
         messageDiv.style.color = 'green';
