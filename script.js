@@ -3,7 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxDaysPerPerson = 4;
     const form = document.getElementById('signupForm');
     const nameInput = document.getElementById('name');
+    const selectedDayInput = document.getElementById('selectedDay');
     const calendarDiv = document.getElementById('calendar');
+    const messageDiv = document.getElementById('message');
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
@@ -27,44 +29,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 dayDiv.classList.add('full');
             }
 
+            dayDiv.addEventListener('click', () => selectDay(dayDiv));
+
             calendarDiv.appendChild(dayDiv);
         }
+    }
+
+    function selectDay(dayDiv) {
+        const previousSelected = document.querySelector('.day.selected');
+        if (previousSelected) {
+            previousSelected.classList.remove('selected');
+        }
+        dayDiv.classList.add('selected');
+        selectedDayInput.value = dayDiv.dataset.day;
     }
 
     function handleSubmit(event) {
         event.preventDefault();
         const name = nameInput.value.trim();
-        if (!name) return;
+        const selectedDay = selectedDayInput.value;
+        if (!name || !selectedDay) return;
 
         const daysSignedUp = Object.values(signups).flat().filter(n => n === name).length;
         if (daysSignedUp >= maxDaysPerPerson) {
-            alert(`Solo puedes anotarte en ${maxDaysPerPerson} días por mes.`);
+            messageDiv.textContent = `Solo puedes anotarte en ${maxDaysPerPerson} días por mes.`;
             return;
         }
 
-        const dayDiv = document.querySelector('.day:hover');
-        if (!dayDiv) {
-            alert('Por favor, selecciona un día válido.');
+        signups[selectedDay] = signups[selectedDay] || [];
+
+        if (signups[selectedDay].includes(name)) {
+            messageDiv.textContent = 'No puedes anotarte más de una vez en el mismo día.';
             return;
         }
 
-        const day = dayDiv.dataset.day;
-        signups[day] = signups[day] || [];
-
-        if (signups[day].includes(name)) {
-            alert('No puedes anotarte más de una vez en el mismo día.');
+        if (signups[selectedDay].length >= maxSlotsPerDay) {
+            messageDiv.textContent = 'Este día ya está completo.';
             return;
         }
 
-        if (signups[day].length >= maxSlotsPerDay) {
-            alert('Este día ya está completo.');
-            return;
-        }
-
-        signups[day].push(name);
+        signups[selectedDay].push(name);
         localStorage.setItem('signups', JSON.stringify(signups)); // Save signups to localStorage
         nameInput.value = '';
+        selectedDayInput.value = '';
         renderCalendar(currentMonth, currentYear);
+        messageDiv.textContent = 'Te has anotado con éxito.';
     }
 
     form.addEventListener('submit', handleSubmit);
