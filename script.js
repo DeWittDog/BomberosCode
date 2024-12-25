@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function selectDay(dayDiv) {
+        console.log(`Day selected: ${dayDiv.dataset.day}`);
         const previousSelected = document.querySelector('.day.selected');
         if (previousSelected) {
             previousSelected.classList.remove('selected');
