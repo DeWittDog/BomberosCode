@@ -48,7 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         const name = nameInput.value.trim();
         const selectedDay = selectedDayInput.value;
-        if (!name || !selectedDay) return;
+        if (!name || !selectedDay) {
+            messageDiv.textContent = 'Por favor, ingresa tu nombre y selecciona un día.';
+            return;
+        }
 
         const daysSignedUp = Object.values(signups).flat().filter(n => n === name).length;
         if (daysSignedUp >= maxDaysPerPerson) {
@@ -74,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedDayInput.value = '';
         renderCalendar(currentMonth, currentYear);
         messageDiv.textContent = 'Te has anotado con éxito.';
+        messageDiv.style.color = 'green';
     }
 
     form.addEventListener('submit', handleSubmit);
