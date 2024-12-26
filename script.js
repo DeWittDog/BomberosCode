@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentYear = new Date().getFullYear();
     let selectedDays = []; // Array to keep track of selected days
 
-    // Cargar inscripciones desde localStorage o inicializar un objeto vacío si no hay datos
+    // Load signups from localStorage or initialize an empty object if not present
     const signups = JSON.parse(localStorage.getItem('signups')) || {};
 
     function renderCalendar(month, year) {
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function selectDay(event, dayDiv) {
-        // Prevenir selección de días llenos
+        // Prevent selection of full days
         if (dayDiv.classList.contains('full')) {
             messageDiv.textContent = 'Este día ya está completo.';
             return;
@@ -49,20 +49,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const day = dayDiv.dataset.day;
 
         if (selectedDays.includes(day)) {
-            // Deseleccionar el día
+            // Deselect the day
             selectedDays = selectedDays.filter(d => d !== day);
             dayDiv.classList.remove('selected');
         } else {
-            // Verificar si el usuario ya ha seleccionado 4 días
+            // Check if the user has already selected 4 days
             if (selectedDays.length >= maxDaysPerPerson) {
                 messageDiv.textContent = `Solo puedes seleccionar hasta ${maxDaysPerPerson} días.`;
                 return;
             }
-            // Seleccionar el día
+            // Select the day
             selectedDays.push(day);
             dayDiv.classList.add('selected');
         }
-        messageDiv.textContent = ''; // Limpiar mensaje de error
+        messageDiv.textContent = ''; // Clear error message
     }
 
     function handleSubmit(event) {
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        localStorage.setItem('signups', JSON.stringify(signups)); // Guardar inscripciones en localStorage
+        localStorage.setItem('signups', JSON.stringify(signups)); // Save signups to localStorage
         nameInput.value = '';
         selectedDays = [];
         renderCalendar(currentMonth, currentYear);
